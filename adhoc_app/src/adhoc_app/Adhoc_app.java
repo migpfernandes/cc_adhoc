@@ -7,6 +7,7 @@
 package adhoc_app;
 
 import Models.Peer;
+import Models.Peers;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
@@ -41,5 +42,16 @@ public class Adhoc_app {
         p2 = Peer.fromJson(json);
         System.out.println("json: " + json + "\n");
         System.out.println("final: " + p2.toString() + "\n");
+        
+        p2.setName("Mac2");
+        Peers peers = new Peers();
+        peers.put(p.getName(), p);
+        peers.put(p2.getName(),p2);
+        
+        json = peers.toJson();
+        System.out.println("colection json: " + json + "\n");
+
+        Peers peers2 = Peers.fromJson(json);
+        System.out.println(peers2.toString());
     }
 }
