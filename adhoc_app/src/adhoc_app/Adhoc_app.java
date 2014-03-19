@@ -8,6 +8,8 @@ package adhoc_app;
 
 import Models.Peer;
 import Models.Peers;
+import Functions.NeighbourDiscoverer;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
@@ -23,10 +25,10 @@ public class Adhoc_app {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        NeighbourDiscoverer nd = new NeighbourDiscoverer();
         try {
-            // TODO code application logic here
-            Teste();
-        } catch (UnknownHostException ex) {
+            nd.InitDiscovery();
+        } catch (IOException ex) {
             Logger.getLogger(Adhoc_app.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

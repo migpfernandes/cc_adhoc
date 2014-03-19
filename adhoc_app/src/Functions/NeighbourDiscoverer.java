@@ -28,19 +28,21 @@ public class NeighbourDiscoverer {
         // join a Multicast group and send the group salutations ... 
         String msg = "Hello";
         InetAddress group = InetAddress.getByName(MCAST_ADDR);
-        MulticastSocket s = new MulticastSocket(PORT); 
-        s.joinGroup(group);
+        MulticastSocket s = new MulticastSocket(); 
+        //s.joinGroup(group);
         s.setTimeToLive(TTL);
         DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(), group, PORT);
         s.send(hi);
+        s.close();
         
-        // get their responses!
+        /*// get their responses!
         byte[] buf = new byte[1000];
         DatagramPacket recv = new DatagramPacket(buf, buf.length); 
         s.receive(recv);
         
         // OK, I'm done talking - leave the group...
         s.leaveGroup(group);
-    }
+    */
+     }
     
 }
