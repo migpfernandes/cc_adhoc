@@ -20,4 +20,14 @@ public enum MessageType {
         }
         
         public int getValue(){return this.typeValue;}
+        
+        public static MessageType fromInteger(int x){
+            switch(x) {
+            case 0:
+                return Request;
+            case 1:
+                return Reply;
+            }
+            return null;
+        }
 }

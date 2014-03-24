@@ -6,9 +6,10 @@
 
 package adhoc_app;
 
-import Models.Peer;
+import Common.Global;
 import Models.Peers;
 import Functions.NeighbourDiscoverer;
+import Functions.NetworkListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -25,14 +26,22 @@ public class Adhoc_app {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        NeighbourDiscoverer nd = new NeighbourDiscoverer();
         try {
+            Global.peers = new Peers();
+            
+            NeighbourDiscoverer nd = new NeighbourDiscoverer();
+            
+            Thread thread = new Thread(new NetworkListener());
+            thread.start(); 
+            
             nd.InitDiscovery();
+            
         } catch (IOException ex) {
             Logger.getLogger(Adhoc_app.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    /*
     private static void Teste() throws UnknownHostException{
         Peer p2;
         String json;
@@ -56,4 +65,5 @@ public class Adhoc_app {
         Peers peers2 = Peers.fromJson(json);
         System.out.println(peers2.toString());
     }
+    */
 }

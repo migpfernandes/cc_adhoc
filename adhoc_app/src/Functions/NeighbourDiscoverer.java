@@ -6,11 +6,15 @@
 
 package Functions;
 
+import Common.Global;
+import Models.Message.MessageType;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -25,24 +29,18 @@ public class NeighbourDiscoverer {
     }
     
     public void InitDiscovery() throws UnknownHostException, IOException{
-        // join a Multicast group and send the group salutations ... 
-        String msg = "Hello";
+        Models.Message.Hello helloMessage = new Models.Message.Hello(MessageType.Request,"");
+        
+        byte[] msg = helloMessage.GetBytes();
+        
         InetAddress group = InetAddress.getByName(MCAST_ADDR);
-        MulticastSocket s = new MulticastSocket(); 
-        //s.joinGroup(group);
-        s.setTimeToLive(TTL);
-        DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(), group, PORT);
-        s.send(hi);
-        s.close();
+        MulticastSocket mSocket = new MulticastSocket(); 
+        mSocket.setTimeToLive(TTL);
         
-        /*// get their responses!
-        byte[] buf = new byte[1000];
-        DatagramPacket recv = new DatagramPacket(buf, buf.length); 
-        s.receive(recv);
+        DatagramPacket message = new DatagramPacket(msg, msg.length, group, PORT);
+        mSocket.send(message);
         
-        // OK, I'm done talking - leave the group...
-        s.leaveGroup(group);
-    */
+        mSocket.close();
      }
     
 }

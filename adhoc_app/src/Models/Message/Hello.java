@@ -53,6 +53,21 @@ public class Hello {
         this.peers = peers;
     }
     
+    public Hello(String messageData){
+        String fields[];
+        String typeMsg,jsonPeers;
+        fields = messageData.split("\\|");
+        if(fields.length >= 2) {
+            typeMsg = fields[1];
+            
+            this.type = MessageType.fromInteger(Integer.parseInt(typeMsg));
+            if (fields.length == 3) this.peers = fields[2];
+            
+        } else {
+            throw new IllegalArgumentException("Não é possível construir o obejto HelloMessage a partir da String recebida.");
+        }
+    }
+    
     public String GetData(){
         StringBuilder sb = new StringBuilder();
         sb.append("HELLO");        
@@ -60,7 +75,15 @@ public class Hello {
         sb.append(type.getValue());
         sb.append("|");
         sb.append(peers);
+        sb.append("|");
         return sb.toString();
     }
     
+    public byte[] GetBytes(){
+        return this.GetData().getBytes();
+    }
+
+    private MessageType MessageType(int parseInt) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
