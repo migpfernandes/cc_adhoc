@@ -35,11 +35,12 @@ public class NetworkListener implements Runnable {
             
             while(true){
                 DatagramPacket pedido = new DatagramPacket(aReceber, aReceber.length);
+                System.out.println("Tou à escuta:\n");
                 s.receive(pedido);
                 String pedidoString = new String(pedido.getData(), 0, pedido.getLength());
                 System.out.println(pedidoString);
                 
-                ProcessMessage(pedido.getAddress().getCanonicalHostName(), pedido.getAddress(),pedidoString);
+                ProcessMessage(pedido.getAddress(),pedidoString);
             }
         } catch (SocketException ex) {
             Logger.getLogger(NetworkListener.class.getName()).log(Level.SEVERE, null, ex);
@@ -48,16 +49,18 @@ public class NetworkListener implements Runnable {
         }
     }
     
-    public void ProcessMessage(String senderName, InetAddress senderIp, String message){
+    public void ProcessMessage(InetAddress senderIp, String message){
         if (message.startsWith("HELLO")){
-            ProcessHello(senderName,senderIp,message);
+            ProcessHello(senderIp,message);
         }
     }
     
-    public void ProcessHello(String senderName, InetAddress senderIp, String message){
+    public void ProcessHello(InetAddress senderIp, String message){
         Hello msg = new Hello(message);
         
-        AddSenderPeer(senderName,senderIp);
+        if (msg.getSender().equals(Global.machineName)) return;
+        
+        AddSenderPeer(msg.getSender(),senderIp);
         
         if (msg.getType() == MessageType.Request){
             try {
@@ -66,12 +69,14 @@ public class NetworkListener implements Runnable {
                 Logger.getLogger(NetworkListener.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            Global.peers.RegisterPeers(Peers.fromJson(msg.getPeers()));
+            Global.peers.RegisterPeers(Peers.fromDataInMsg(
+                    msg.getSender(),senderIp,msg.getPeers()));
         }
     }
     
     public void SendHelloReply(InetAddress senderIp) throws SocketException, IOException{
-        Hello helloMessage = new Hello(MessageType.Reply, Global.peers.toJson());
+        Hello helloMessage = new Hello(Global.machineName, MessageType.Reply, 
+                Global.peers.getDataToMsg());
         
         System.out.println("\n\nHelloReply: " + helloMessage.GetData());
         
@@ -83,10 +88,7 @@ public class NetworkListener implements Runnable {
         s.send(p);
     }
     
-      private void AddSenderPeer(String name,InetAddress ipaddress){
-        System.out.println("Localhost Name: " + name);
-        System.out.println("Localhost IP: " + ipaddress.toString());
-        
+      private void AddSenderPeer(String name,InetAddress ipaddress){        
         Global.peers.RegisterPeer(name, name, ipaddress, 1);
     }
         

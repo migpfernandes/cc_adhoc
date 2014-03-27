@@ -14,4 +14,5 @@ import Models.Peers;
  */
 public class Global {
     public static Peers peers;
+    public static String machineName="";
 }

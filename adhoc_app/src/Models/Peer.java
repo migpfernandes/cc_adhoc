@@ -15,6 +15,8 @@ import java.util.Date;
  * @author migpfernandes
  */
 public class Peer {
+    private static final String FIELD_SEPARATOR = "&";
+    
     private String Name;
     private int ErrorsNo;
     private String NeighbourName;
@@ -147,5 +149,29 @@ public class Peer {
         Gson gson = new Gson();
         p = gson.fromJson(json, Peer.class); 
         return p;
+    }
+    
+    public String getDataToMsg(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getName());
+        sb.append(FIELD_SEPARATOR);
+        sb.append(this.getLeaps());
+        return sb.toString();
+    }
+    
+    public static Peer fromDataInMsg(String neighbourName,InetAddress neighbourIP, String data){
+        String[] fields;
+        String peerName;
+        int leaps;
+        
+        fields = data.split(FIELD_SEPARATOR);
+        
+        peerName = fields[0];
+        leaps = Integer.parseInt(fields[1]);
+        
+        Peer res = new Peer(peerName, neighbourName, neighbourIP); 
+        res.setLeaps(leaps);
+        
+        return res;
     }
 }
