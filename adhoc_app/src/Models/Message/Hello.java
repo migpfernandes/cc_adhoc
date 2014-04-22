@@ -73,7 +73,7 @@ public class Hello {
     
     public Hello(String messageData){
         String fields[];
-        String typeMsg,jsonPeers;
+        String typeMsg;
         fields = messageData.split("\\|");
         if(fields.length >= 3) {
             sender = fields[1];
