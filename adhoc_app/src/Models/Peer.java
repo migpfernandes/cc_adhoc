@@ -6,7 +6,6 @@
 
 package Models;
 
-import com.google.gson.Gson;
 import java.net.InetAddress;
 import java.util.Date;
 
@@ -107,6 +106,10 @@ public class Peer {
     public void setLastSuccessfulConnection(Date LastSuccessfulConnection) {
         this.LastSuccessfulConnection = LastSuccessfulConnection;
     }
+    
+    public boolean isDirectNeighbour(){
+        return this.getName().equals(this.getNeighbourName());
+    }
 
     /**
      * Construtores
@@ -129,6 +132,15 @@ public class Peer {
         this.LastSuccessfulConnection = new Date();
     }
     
+    public Peer(Peer p){
+        this.ErrorsNo=p.getErrorsNo();
+        this.Name = p.getName();
+        this.NeighbourName=p.getNeighbourName();
+        this.NeighbourIP=p.getNeighbourIP();
+        this.Leaps=p.getLeaps();
+        this.LastSuccessfulConnection = p.getLastSuccessfulConnection();
+    }
+    
     @Override
     public String toString(){
         String pattern = "%s: %s\n";
@@ -139,16 +151,9 @@ public class Peer {
         return sb.toString();
     }
     
-    public String toJson(){
-        Gson gson = new Gson();
-        return gson.toJson(this);
-    }
-    
-    public static Peer fromJson(String json){
-        Peer p;
-        Gson gson = new Gson();
-        p = gson.fromJson(json, Peer.class); 
-        return p;
+    @Override
+    public Peer clone(){
+        return new Peer(this);
     }
     
     public String getDataToMsg(){

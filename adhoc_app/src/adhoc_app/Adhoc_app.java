@@ -9,14 +9,12 @@ package adhoc_app;
 import Common.Global;
 import Models.Peers;
 import Functions.NeighbourDiscoverer;
+import Functions.NeighbourFind;
 import Functions.NetworkListener;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -28,24 +26,43 @@ public class Adhoc_app {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        try {
-            while (Global.machineName.equals("")){
-                System.out.println("Introduza o nome da máquina:");
-                Global.machineName = System.console().readLine();
-                if (Global.machineName.equals("")) System.out.println("Nome inválido!\n\n");
+        while (Global.machineName.equals("")){
+            System.out.println("Introduza o nome da máquina:");
+            Global.machineName = System.console().readLine();
+            if (Global.machineName.equals("")) System.out.println("Nome inválido!\n\n");
+        }
+        Global.peers = new Peers(Global.machineName);
+        
+        Thread thread = new Thread(new NetworkListener());
+        thread.start();
+        Thread thread2 = new Thread(new NeighbourDiscoverer());
+        thread2.start();
+        
+        tester();
+    }
+    
+    private static void tester(){
+        while (true) {
+            System.out.println("À espera de input...");
+            String text = System.console().readLine();
+            if (text.equals("peers")) {
+                System.out.println(Global.peers.toString());
+            } else if (text.startsWith("find:")) {
+                String fields[];
+                text = text.replace("find:","");
+                fields = text.split(":");
+                
+                if (fields.length == 2){
+                    String destination = fields[0];
+                    int loops = Integer.parseInt(fields[1]);
+                    Thread thread = new Thread(new NeighbourFind(destination,loops));
+                    thread.start();
+                } else {
+                    System.out.println("Comando Find com erros de sintaxe.");
+                }
+            } else {
+                System.out.println("Comando não reconhecido.");
             }
-            
-            Global.peers = new Peers(Global.machineName);
-            
-            NeighbourDiscoverer nd = new NeighbourDiscoverer();
-            
-            Thread thread = new Thread(new NetworkListener());
-            thread.start(); 
-            
-            nd.InitDiscovery();
-            
-        } catch (IOException ex) {
-            Logger.getLogger(Adhoc_app.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

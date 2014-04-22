@@ -15,18 +15,29 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author migpfernandes
  */
-public class NeighbourDiscoverer {
+public class NeighbourDiscoverer implements Runnable {
 
     public final int PORT = 9999;
     public final String MCAST_ADDR = "FF02::1";
     public final int TTL = 1;
 
     public NeighbourDiscoverer() {
+    }
+    
+        @Override
+    public void run() {
+        try {
+            InitDiscovery();
+        } catch (IOException ex) {
+            Logger.getLogger(NeighbourDiscoverer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void InitDiscovery() throws UnknownHostException, IOException {
