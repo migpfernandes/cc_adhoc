@@ -22,28 +22,33 @@ import java.util.logging.Logger;
  * @author migpfernandes
  */
 public class NeighbourFind implements Runnable {
-    public final int PORT = 9999;
+    public final int PORTSENDER = 9998;
+    public final int PORTDESTINATION = 9999;
     
-    private final String destination;
-    private final int leaps;
+    private RouteRequest request;
     
     public NeighbourFind(String neighbour,int leaps){
-        this.destination = neighbour;
-        this.leaps = leaps;
+        this.request = new RouteRequest(Global.machineName,neighbour ,leaps, "");
+        
+    }
+    
+    public NeighbourFind(RouteRequest request){
+        this.request = request;
     }
     
     @Override
     public void run() {
         try {
-            RouteRequest request = new RouteRequest(Global.machineName, destination,leaps, "");
-            byte[] msg = request.GetBytes();
+            byte[] msg = this.request.GetBytes();
             
             TreeSet<Peer> peers = new TreeSet<Peer>(Global.peers.getDirectPeers());
-            DatagramSocket s = new DatagramSocket(PORT);
+            DatagramSocket s = new DatagramSocket(PORTSENDER);
             
             for(Peer p : peers){
-                DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), PORT);
-                s.send(message);
+                if(!(request.getPeers().contains(p.getName()))){
+                    DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), PORTDESTINATION);
+                    s.send(message);
+                }
             }
             s.close();
             

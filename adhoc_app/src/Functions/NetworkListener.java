@@ -8,15 +8,20 @@ package Functions;
 
 import Common.Global;
 import Models.Message.Hello;
+import Models.Message.RouteRequest;
 import Models.Message.MessageType;
+import Models.Message.RouteReply;
 import Models.Peers;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  *
@@ -35,7 +40,6 @@ public class NetworkListener implements Runnable {
             
             while(true){
                 DatagramPacket pedido = new DatagramPacket(aReceber, aReceber.length);
-                System.out.println("Tou à escuta:\n");
                 s.receive(pedido);
                 String pedidoString = new String(pedido.getData(), 0, pedido.getLength());
                 System.out.println(pedidoString);
@@ -52,9 +56,12 @@ public class NetworkListener implements Runnable {
     public void ProcessMessage(InetAddress senderIp, String message){
         if (message.startsWith("HELLO")){
             ProcessHello(senderIp,message);
+        } else if (message.startsWith("ROUTE_REQUEST")){
+            ProcessRouteRequest(senderIp,message);
         }
     }
     
+    //HELLO
     public void ProcessHello(InetAddress senderIp, String message){
         Hello msg = new Hello(message);
         
@@ -88,8 +95,27 @@ public class NetworkListener implements Runnable {
         s.send(p);
     }
     
-      private void AddSenderPeer(String name,InetAddress ipaddress){        
+    
+    //ROUTE REQUEST
+    public void ProcessRouteRequest(InetAddress senderIp,String message){
+        RouteRequest msg = new RouteRequest(message);
+        if ((msg.getPeers()!= null) && (msg.getPeers().contains(Global.machineName))){
+            //Não faz nada
+        } else if (msg.getRadius()<=1){
+            throw new NotImplementedException();
+        } else if (msg.getDestination().equals(Global.machineName)){
+            throw new NotImplementedException();
+        } else {
+            msg.setRadius(msg.getRadius()-1);
+            msg.appendPeer(Global.machineName);
+            Thread thread = new Thread(new NeighbourFind(msg));
+           thread.start();
+        }
+    }
+    
+    private void AddSenderPeer(String name,InetAddress ipaddress){        
         Global.peers.RegisterPeer(name, name, ipaddress, 1);
     }
         
+    
 }

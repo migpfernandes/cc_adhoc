@@ -41,7 +41,9 @@ public class Peers {
     public Collection<Peer> getDirectPeers() {
         TreeSet<Peer> res = new TreeSet<Peer>();
         for(Peer p : this.knownPeers.values()){
-            if (p.isDirectNeighbour()) res.add(p.clone());
+            if (p.isDirectNeighbour()){
+                res.add(p.clone());
+            }
         }
         return res;
     }

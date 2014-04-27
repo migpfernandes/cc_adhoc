@@ -13,7 +13,8 @@ import Common.Global;
  * @author migpfernandes
  */
 public class RouteRequest {
-
+    private static final String REGISTER_SEPARATOR = "\t";
+    
     private String sender;
     private String peers;
     private int radius;
@@ -47,6 +48,14 @@ public class RouteRequest {
      */
     public void setPeers(String peers) {
         this.peers = peers;
+    }
+    
+    public void appendPeer(String peerName){
+        if ((this.peers == null) || (this.peers.isEmpty())){
+            this.peers = peerName;
+        } else {
+            this.peers = this.peers + REGISTER_SEPARATOR + peerName;
+        }
     }
     
     
@@ -120,7 +129,7 @@ public class RouteRequest {
             if (fields.length == 5) this.peers = fields[4];
             
         } else {
-            throw new IllegalArgumentException("Não é possível construir o obejto HelloRequest a partir da String recebida.");
+            throw new IllegalArgumentException("Não é possível construir o objeto HelloRequest a partir da String recebida.");
         }
     }
     

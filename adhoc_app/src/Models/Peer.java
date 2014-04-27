@@ -13,7 +13,7 @@ import java.util.Date;
  *
  * @author migpfernandes
  */
-public class Peer {
+public class Peer implements Comparable{
     private static final String FIELD_SEPARATOR = "&";
     
     private String Name;
@@ -178,5 +178,14 @@ public class Peer {
         res.setLeaps(leaps);
         
         return res;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (o instanceof Peer ){
+            return this.getName().compareTo(((Peer) o).getName());
+        } else {
+            throw new IllegalArgumentException("O objeto não pode ser convertido para Peer.");
+        }
     }
 }
