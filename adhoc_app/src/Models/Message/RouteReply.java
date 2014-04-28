@@ -17,6 +17,8 @@ public class RouteReply {
     private String sender;
     private String peers;
     private String destination;
+    private String answerType;
+    private String peerToFind;
     private int leaps;
     
     /**
@@ -62,6 +64,33 @@ public class RouteReply {
         this.destination = destination;
     }
     
+     /**
+     * @return the answerType
+     */
+    public String getAnswerType() {
+        return answerType;
+    }
+
+    /**
+     * @param answerType the answerType to set
+     */
+    public void setAnswerType(String answerType) {
+        this.answerType = answerType;
+    }
+    
+    /**
+     * @return the peerToFind
+     */
+    public String getPeerToFind() {
+        return peerToFind;
+    }
+
+    /**
+     * @param peerToFind the peerToFind to set
+     */
+    public void setPeerToFind(String peerToFind) {
+        this.peerToFind = peerToFind;
+    }
     
     /**
      * @return the leaps
@@ -77,18 +106,20 @@ public class RouteReply {
         this.leaps = leaps;
     }
     
-    
     public RouteReply(){
         this.sender = "";
         this.destination = "";
-        this.leaps = -1;
         this.peers = "";
-        
+        this.answerType = "";
+        this.leaps = 1;
+        this.peerToFind = "";
     }
     
-    public RouteReply(String sender,String destination,int leaps,String peers){
+    public RouteReply(String sender,String destination,String peerToFind,int leaps,String peers,String answer){
         this.sender = sender;
         this.destination = destination;
+        this.peerToFind = peerToFind;
+        this.answerType = answer;
         this.leaps = leaps;
         this.peers = peers;
     }
@@ -96,12 +127,14 @@ public class RouteReply {
     public RouteReply(String messageData){
         String fields[];
         fields = messageData.split("\\|");
-        if(fields.length >= 3) {
+        if(fields.length >= 6) {
             this.sender = fields[1];
             this.destination = fields[2];
-            this.leaps = Integer.parseInt(fields[3]);
+            this.peerToFind = fields[3];
+            this.answerType = fields[4];
+            this.leaps = Integer.parseInt(fields[5]);
             
-            if (fields.length == 5) this.peers = fields[4];
+            if (fields.length == 7) this.peers = fields[6];
             
         } else {
             throw new IllegalArgumentException("Não é possível construir o objeto HelloReply a partir da String recebida.");
@@ -109,7 +142,7 @@ public class RouteReply {
     }
     
     /*
-    ROUTE_REQUEST|MACHINE|DESTINATION|JUMPS|PEERS_PATHOFRETURN
+    ROUTE_REPLY|MACHINE|DESTINATION|PEER2FIND|ANSWER|PEERS_PATHOFRETURN
     */
     
     public String GetData(){
@@ -120,9 +153,13 @@ public class RouteReply {
         sb.append("|");
         sb.append(this.getDestination());
         sb.append("|");
+        sb.append(this.getPeerToFind());
+        sb.append("|");
+        sb.append(this.getAnswerType());
+        sb.append("|");
         sb.append(this.getLeaps());
         sb.append("|");
-        sb.append(peers);
+        sb.append(this.peers);
         sb.append("|");
         return sb.toString();
     }

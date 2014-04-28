@@ -17,6 +17,7 @@ public class RouteRequest {
     
     private String sender;
     private String peers;
+    private String peerToFind;
     private int radius;
     private int timeout;
     private String destination;
@@ -102,18 +103,34 @@ public class RouteRequest {
         this.destination = destination;
     }
     
+    /**
+     * @return the peerToFind
+     */
+    public String getPeerToFind() {
+        return peerToFind;
+    }
+
+    /**
+     * @param peerToFind the peerToFind to set
+     */
+    public void setPeerToFind(String peerToFind) {
+        this.peerToFind = peerToFind;
+    }
+    
     
     public RouteRequest(){
         this.sender = "";
         this.destination = "";
+        this.peerToFind = "";
         this.radius = -1;
         this.peers = "";
         
     }
     
-    public RouteRequest(String sender,String destination,int radius,String peers){
+    public RouteRequest(String sender,String destination,String peerToFind,int radius,String peers){
         this.sender = sender;
         this.destination = destination;
+        this.peerToFind = peerToFind;
         this.radius = radius;
         this.peers = peers;
     }
@@ -121,12 +138,13 @@ public class RouteRequest {
     public RouteRequest(String messageData){
         String fields[];
         fields = messageData.split("\\|");
-        if(fields.length >= 3) {
+        if(fields.length >= 5) {
             this.sender = fields[1];
             this.destination = fields[2];
-            this.radius = Integer.parseInt(fields[3]);
+            this.peerToFind = fields[3];
+            this.radius = Integer.parseInt(fields[4]);
             
-            if (fields.length == 5) this.peers = fields[4];
+            if (fields.length == 6) this.peers = fields[5];
             
         } else {
             throw new IllegalArgumentException("Não é possível construir o objeto HelloRequest a partir da String recebida.");
@@ -144,6 +162,8 @@ public class RouteRequest {
         sb.append(Global.machineName);
         sb.append("|");
         sb.append(this.getDestination());
+        sb.append("|");
+        sb.append(this.getPeerToFind());
         sb.append("|");
         sb.append(this.getRadius());
         sb.append("|");

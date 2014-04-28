@@ -78,6 +78,18 @@ public class Peers {
             RegisterPeer(p.getName(), p.getNeighbourName(), p.getNeighbourIP(), p.getLeaps() + 1);
         }
     }
+    
+    public Peer get(String name){
+        if (this.contains(name)){
+            return this.knownPeers.get(name);
+        } else {
+            return null;
+        }
+    }
+    
+    public boolean contains(String peername){
+        return this.knownPeers.containsKey(peername);
+    }
 
     public String getDataToMsg() {
         StringBuilder sb = new StringBuilder();

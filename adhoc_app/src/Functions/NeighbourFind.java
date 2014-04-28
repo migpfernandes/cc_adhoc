@@ -28,8 +28,7 @@ public class NeighbourFind implements Runnable {
     private RouteRequest request;
     
     public NeighbourFind(String neighbour,int leaps){
-        this.request = new RouteRequest(Global.machineName,neighbour ,leaps, "");
-        
+        this.request = new RouteRequest(Global.machineName,"",neighbour,leaps, Global.machineName);
     }
     
     public NeighbourFind(RouteRequest request){
@@ -39,13 +38,15 @@ public class NeighbourFind implements Runnable {
     @Override
     public void run() {
         try {
-            byte[] msg = this.request.GetBytes();
+            
             
             TreeSet<Peer> peers = new TreeSet<Peer>(Global.peers.getDirectPeers());
             DatagramSocket s = new DatagramSocket(PORTSENDER);
             
             for(Peer p : peers){
                 if(!(request.getPeers().contains(p.getName()))){
+                    this.request.setDestination(p.getName());
+                    byte[] msg = this.request.GetBytes();
                     DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), PORTDESTINATION);
                     s.send(message);
                 }
