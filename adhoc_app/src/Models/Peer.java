@@ -148,6 +148,7 @@ public class Peer implements Comparable{
         sb.append(String.format(pattern,"Nome",this.Name));
         sb.append(String.format(pattern,"NomeVizinho",this.NeighbourName));
         sb.append(String.format(pattern,"IP",this.NeighbourIP.getHostAddress()));
+        sb.append(String.format(pattern,"Leaps",this.getLeaps()));
         return sb.toString();
     }
     

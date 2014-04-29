@@ -17,6 +17,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -99,12 +100,14 @@ public class NetworkListener implements Runnable {
 
     //ROUTE REQUEST
     public void ProcessRouteRequest(String message) throws IOException {
-
+        String peers[];
         RouteRequest msg = new RouteRequest(message);
-        if ((msg.getPeers() != null) && (msg.getPeers().contains(Global.machineName))) {
+        
+        if ((msg.getPeers() != null)
+                && (Arrays.contains(msg.getPeers().split(PEERSEPARATOR), Global.machineName))) {
             //Não faz nada
             System.out.println("Não pode passar aqui.");
-        } else if (msg.getRadius() <= 1) {
+        } else if ((msg.getRadius() <= 1) || (allPeersQueried(msg.getPeers()))) {
             System.out.println("Terminou pesquisa sem encontrar.");
             RespondToRouteRequest(msg, false);
         } else if (Global.peers.contains(msg.getPeerToFind())) {
@@ -117,7 +120,6 @@ public class NetworkListener implements Runnable {
             Thread thread = new Thread(new NeighbourFind(msg));
             thread.start();
         }
-
     }
 
     private void RespondToRouteRequest(RouteRequest request, boolean foundPeer) throws SocketException, IOException {
@@ -125,11 +127,11 @@ public class NetworkListener implements Runnable {
         String answer;
         int leaps;
         Peer peer;
-        
+
         destinations = getDestinations(request.getPeers());
         destination = PopDestination(request.getPeers());
-        
-        if (foundPeer){
+
+        if (foundPeer) {
             answer = "OK";
             peer = Global.peers.get(request.getPeerToFind());
             leaps = peer.getLeaps() + 1;
@@ -137,11 +139,11 @@ public class NetworkListener implements Runnable {
             answer = "NF";
             leaps = 1;
         }
-        
-         peer = Global.peers.get(destination);
-        
-        RouteReply reply = new RouteReply(Global.machineName, destination,request.getPeerToFind(),
-                                            leaps,destinations, answer);
+
+        peer = Global.peers.get(destination);
+
+        RouteReply reply = new RouteReply(Global.machineName, destination, request.getPeerToFind(),
+                leaps, destinations, answer);
 
         byte[] msg = reply.GetBytes();
 
@@ -151,25 +153,38 @@ public class NetworkListener implements Runnable {
         s.send(p);
     }
 
+    private boolean allPeersQueried(String peers) {
+        boolean res = true;
+        Peer p;
+
+        if (peers != null) {
+            String ps[] = peers.split(PEERSEPARATOR);
+            Iterator<Peer> it = Global.peers.getPeers().iterator();
+            while ((res) && (it.hasNext())) {
+                p = (Peer) it.next();
+                res = (!Arrays.contains(ps, p.getName()));
+            }
+        }
+        return res;
+    }
+
     //ROUTE REPLY
     private void ProcessRouteReply(String message) throws SocketException, IOException {
         String destination;
         RouteReply reply = new RouteReply(message);
 
-        if (reply.getAnswerType().equals("OK")){
+        if (reply.getAnswerType().equals("OK")) {
             Peer peer = Global.peers.get(reply.getSender());
-            Global.peers.RegisterPeer(reply.getPeerToFind(),peer.getName() , peer.getNeighbourIP(), reply.getLeaps());
+            Global.peers.RegisterPeer(reply.getPeerToFind(), peer.getName(), peer.getNeighbourIP(), reply.getLeaps());
         }
-            
-        if ((reply.getPeers()!=null) && !(reply.getPeers().isEmpty())) {
+
+        if ((reply.getPeers() != null) && !(reply.getPeers().isEmpty())) {
             destination = PopDestination(reply.getPeers());
             reply.setPeers(getDestinations(reply.getPeers()));
             reply.setDestination(destination);
             reply.setSender(Global.machineName);
-            reply.setLeaps(reply.getLeaps()+1);
-            
-            System.out.println("RouteReplySent: " + reply.GetData());
-            
+            reply.setLeaps(reply.getLeaps() + 1);
+
             Peer peer = Global.peers.get(destination);
 
             byte[] msg = reply.GetBytes();
@@ -178,7 +193,7 @@ public class NetworkListener implements Runnable {
 
             DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), PORT);
             s.send(p);
-        } else if (reply.getAnswerType().equals("NF")){
+        } else if (reply.getAnswerType().equals("NF")) {
             System.out.println("O peer " + reply.getPeerToFind() + " não foi encontrado.");
         }
     }

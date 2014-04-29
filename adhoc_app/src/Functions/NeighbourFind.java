@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package Functions;
 
 import Common.Global;
@@ -22,43 +21,54 @@ import java.util.logging.Logger;
  * @author migpfernandes
  */
 public class NeighbourFind implements Runnable {
-    public final int PORTSENDER = 9998;
-    public final int PORTDESTINATION = 9999;
-    
-    private RouteRequest request;
-    
-    public NeighbourFind(String neighbour,int leaps){
-        this.request = new RouteRequest(Global.machineName,"",neighbour,leaps, Global.machineName);
+
+    private final int PORTDESTINATION = 9999;
+    private final String PEERSEPARATOR = "\t";
+    private final int TIMEOUT = 10;
+
+    private final RouteRequest request;
+
+    public NeighbourFind(String neighbour, int leaps) {
+        this.request = new RouteRequest(Global.machineName, "", neighbour, leaps, Global.machineName);
     }
-    
-    public NeighbourFind(RouteRequest request){
+
+    public NeighbourFind(RouteRequest request) {
         this.request = request;
     }
-    
+
     @Override
     public void run() {
         try {
-            
-            
-            TreeSet<Peer> peers = new TreeSet<Peer>(Global.peers.getDirectPeers());
-            DatagramSocket s = new DatagramSocket(PORTSENDER);
-            
-            for(Peer p : peers){
-                if(!(request.getPeers().contains(p.getName()))){
-                    this.request.setDestination(p.getName());
-                    byte[] msg = this.request.GetBytes();
-                    DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), PORTDESTINATION);
-                    s.send(message);
+            if (!(Global.peers.contains(request.getPeerToFind()))) {
+                int i = 0;
+                TreeSet<Peer> peers = new TreeSet<Peer>(Global.peers.getDirectPeers());
+                DatagramSocket s = new DatagramSocket();
+                String msgPeers[] = request.getPeers().split(PEERSEPARATOR);
+
+                for (Peer p : peers) {
+                    if ((request.getPeers() == null) || (!Arrays.contains(msgPeers, p.getName()))) {
+                        this.request.setDestination(p.getName());
+                        byte[] msg = this.request.GetBytes();
+                        DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), PORTDESTINATION);
+                        s.send(message);
+                    }
+                }
+                s.close();
+                
+                while((i<TIMEOUT) && (!peerFound())){
+                    i++;
+                    Thread.sleep(1000);
                 }
             }
-            s.close();
-            
         } catch (SocketException ex) {
             Logger.getLogger(NeighbourFind.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             Logger.getLogger(NeighbourFind.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
-    
+
+    public boolean peerFound() {
+        return Global.peers.contains(request.getPeerToFind());
+    }
+
 }

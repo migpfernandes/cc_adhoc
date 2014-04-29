@@ -55,8 +55,17 @@ public class Adhoc_app {
                 if (fields.length == 2){
                     String destination = fields[0];
                     int loops = Integer.parseInt(fields[1]);
-                    Thread thread = new Thread(new NeighbourFind(destination,loops));
-                    thread.start();
+                    NeighbourFind nf = new NeighbourFind(destination,loops);
+                    //new Thread(nf).run();
+                    
+                    nf.run();
+                    
+                    if (nf.peerFound()){
+                        System.out.println("Peer encontrado.");
+                    } else {
+                        System.out.println("Peer não encontrado.");
+                    }
+                    
                 } else {
                     System.out.println("Comando Find com erros de sintaxe.");
                 }

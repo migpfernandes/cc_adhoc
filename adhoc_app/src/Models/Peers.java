@@ -135,7 +135,7 @@ public class Peers {
         while (iter.hasNext()) {
             p = (Peer) iter.next();
             sb.append(p.toString());
-            sb.append("\n\n");
+            sb.append("\n");
         }
         return sb.toString();
     }
