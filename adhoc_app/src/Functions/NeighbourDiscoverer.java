@@ -51,6 +51,7 @@ public class NeighbourDiscoverer implements Runnable {
 
         DatagramPacket message = new DatagramPacket(msg, msg.length, group, PORT);
 
+        //Testar sem este bloco
         Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
         while (ifs.hasMoreElements()) {
             NetworkInterface nic = ifs.nextElement();

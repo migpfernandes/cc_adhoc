@@ -107,7 +107,7 @@ public class NetworkListener implements Runnable {
                 && (Arrays.contains(msg.getPeers().split(PEERSEPARATOR), Global.machineName))) {
             //Não faz nada
             System.out.println("Não pode passar aqui.");
-        } else if ((msg.getRadius() <= 1) || (allPeersQueried(msg.getPeers()))) {
+        } else if ((msg.getRadius() < 1) || (allPeersQueried(msg.getPeers()))) {
             System.out.println("Terminou pesquisa sem encontrar.");
             RespondToRouteRequest(msg, false);
         } else if (Global.peers.contains(msg.getPeerToFind())) {

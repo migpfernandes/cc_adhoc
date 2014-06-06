@@ -87,6 +87,8 @@ public class Hello {
         }
     }
     
+    //MsgFormat: HELLO|MACHINENAME|REQUESTORREPLY|peerlist|
+    
     public String GetData(){
         StringBuilder sb = new StringBuilder();
         sb.append("HELLO");        
