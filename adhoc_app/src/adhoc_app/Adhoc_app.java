@@ -5,6 +5,7 @@
  */
 package adhoc_app;
 
+import Common.AdHocSocket;
 import Common.Global;
 import Models.Peers;
 import Functions.NeighbourDiscoverer;
@@ -30,22 +31,27 @@ public class Adhoc_app {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Global.machineName = getMachineName();
-        while (Global.machineName.equals("")) {
-            System.out.println("Introduza o nome da máquina:");
-            Global.machineName = System.console().readLine();
-            if (Global.machineName.equals("")) {
-                System.out.println("Nome inválido!\n\n");
+        try {
+            Global.machineName = getMachineName();
+            while (Global.machineName.equals("")) {
+                System.out.println("Introduza o nome da máquina:");
+                Global.machineName = System.console().readLine();
+                if (Global.machineName.equals("")) {
+                    System.out.println("Nome inválido!\n\n");
+                }
             }
+            Global.adhocSocket = new AdHocSocket();
+            Global.peers = new Peers(Global.machineName);
+            
+            Thread thread = new Thread(new NetworkListener());
+            thread.start();
+            Thread thread2 = new Thread(new NeighbourDiscoverer());
+            thread2.start();
+            
+            tester();
+        } catch (IOException ex) {
+            Logger.getLogger(Adhoc_app.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Global.peers = new Peers(Global.machineName);
-
-        Thread thread = new Thread(new NetworkListener());
-        thread.start();
-        Thread thread2 = new Thread(new NeighbourDiscoverer());
-        thread2.start();
-
-        tester();
     }
 
     private static void tester() {

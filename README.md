@@ -31,15 +31,4 @@ ROUTE_REPLY|MACHINE|DESTINATION|PEER2FIND|ANSWER|PEERS_PATHOFRETURN
 
 PEERS_PATHOFRETURN:Lista de peers separada por tabs
 
-Seria aconselhával adicionar um id para controlo do fluxo das mensagens? Adicionar id.
-
-:
--Falta redirecionar as mensagens quando o peer não seja o destinatário das mensagens.
-
-Concentrar envio e receção de mensagens no mesmo socket.
-Multicast RouteRequest
-Hello de x em x tempo.
-
-No core se se mover um no as ligaçoes quebram-se. É porreiro para testar falhas de ligação.
-
 

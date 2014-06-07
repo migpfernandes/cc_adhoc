@@ -14,13 +14,11 @@ import Models.Peer;
 import Models.Peers;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  *
@@ -36,12 +34,8 @@ public class NetworkListener implements Runnable {
     @Override
     public void run() {
         try {
-            DatagramSocket s = new DatagramSocket(PORT);
-            byte[] aReceber = new byte[1024];
-
             while (true) {
-                DatagramPacket pedido = new DatagramPacket(aReceber, aReceber.length);
-                s.receive(pedido);
+                DatagramPacket pedido = Global.adhocSocket.receiveDatagram();
                 String pedidoString = new String(pedido.getData(), 0, pedido.getLength());
                 System.out.println(pedidoString);
 
@@ -92,10 +86,8 @@ public class NetworkListener implements Runnable {
 
         byte[] msg = helloMessage.GetBytes();
 
-        DatagramSocket s = new DatagramSocket();
-
         DatagramPacket p = new DatagramPacket(msg, msg.length, senderIp, PORT);
-        s.send(p);
+        Global.adhocSocket.SendMessage(p);
     }
 
     //ROUTE REQUEST
@@ -147,10 +139,8 @@ public class NetworkListener implements Runnable {
 
         byte[] msg = reply.GetBytes();
 
-        DatagramSocket s = new DatagramSocket();
-
         DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), PORT);
-        s.send(p);
+        Global.adhocSocket.SendMessage(p);
     }
 
     private boolean allPeersQueried(String peers) {
@@ -189,10 +179,8 @@ public class NetworkListener implements Runnable {
 
             byte[] msg = reply.GetBytes();
 
-            DatagramSocket s = new DatagramSocket();
-
             DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), PORT);
-            s.send(p);
+            Global.adhocSocket.SendMessage(p);
         } else if (reply.getAnswerType().equals("NF")) {
             System.out.println("O peer " + reply.getPeerToFind() + " não foi encontrado.");
         }

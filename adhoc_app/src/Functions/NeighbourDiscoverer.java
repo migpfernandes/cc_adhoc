@@ -28,6 +28,7 @@ public class NeighbourDiscoverer implements Runnable {
     public final String MCAST_ADDR = "FF02::1";
     public final int TTL = 1;
 
+
     public NeighbourDiscoverer() {
     }
     
@@ -44,12 +45,18 @@ public class NeighbourDiscoverer implements Runnable {
         Hello helloMessage = new Hello(Global.machineName, MessageType.Request, "");
 
         byte[] msg = helloMessage.GetBytes();
-
         InetAddress group = InetAddress.getByName(MCAST_ADDR);
+    
+        DatagramPacket message = new DatagramPacket(msg, msg.length,group,PORT);
+        
+        Global.adhocSocket.SendMessage(message);
+        
+        /*
+        
         MulticastSocket mSocket = new MulticastSocket();
         mSocket.setTimeToLive(TTL);
 
-        DatagramPacket message = new DatagramPacket(msg, msg.length, group, PORT);
+        
 
         //Testar sem este bloco
         Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
@@ -63,6 +70,7 @@ public class NeighbourDiscoverer implements Runnable {
             }
         }
         mSocket.close();
+        */
     }
 
 }
