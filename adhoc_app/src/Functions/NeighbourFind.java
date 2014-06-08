@@ -10,7 +10,6 @@ import Models.Message.RouteRequest;
 import Models.Peer;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -41,7 +40,6 @@ public class NeighbourFind implements Runnable {
             if (!(Global.peers.contains(request.getPeerToFind()))) {
                 int i = 0;
                 TreeSet<Peer> peers = new TreeSet<Peer>(Global.peers.getDirectPeers());
-                DatagramSocket s = new DatagramSocket();
                 String msgPeers[] = request.getPeers().split(PEERSEPARATOR);
 
                 for (Peer p : peers) {
@@ -49,10 +47,9 @@ public class NeighbourFind implements Runnable {
                         this.request.setDestination(p.getName());
                         byte[] msg = this.request.GetBytes();
                         DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), Global.APP_PORT);
-                        s.send(message);
+                        Global.adhocSocket.SendMessage(message);
                     }
                 }
-                s.close();
                 
                 while((i<TIMEOUT) && (!peerFound())){
                     i++;

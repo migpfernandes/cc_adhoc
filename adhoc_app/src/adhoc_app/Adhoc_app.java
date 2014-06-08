@@ -7,6 +7,7 @@ package adhoc_app;
 
 import Common.AdHocSocket;
 import Common.Global;
+import Functions.MessageSockets;
 import Models.Peers;
 import Functions.NeighbourDiscoverer;
 import Functions.NeighbourFind;
@@ -47,7 +48,11 @@ public class Adhoc_app {
             thread.start();
             Thread thread2 = new Thread(new NeighbourDiscoverer());
             thread2.start();
-
+            
+            Global.tcpSockets = new MessageSockets();
+            Thread thread3 = new Thread(Global.tcpSockets);
+            thread3.start();
+            
             tester();
         } catch (IOException ex) {
             Logger.getLogger(Adhoc_app.class.getName()).log(Level.SEVERE, null, ex);

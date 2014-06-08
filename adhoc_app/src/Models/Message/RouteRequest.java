@@ -147,7 +147,7 @@ public class RouteRequest {
             if (fields.length == 6) this.peers = fields[5];
             
         } else {
-            throw new IllegalArgumentException("Não é possível construir o objeto HelloRequest a partir da String recebida.");
+            throw new IllegalArgumentException("Não é possível construir o objeto RouteRequest a partir da String recebida.");
         }
     }
     

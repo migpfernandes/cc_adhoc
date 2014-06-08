@@ -10,12 +10,14 @@ import Models.Message.Hello;
 import Models.Message.RouteRequest;
 import Models.Message.MessageType;
 import Models.Message.RouteReply;
+import Models.Message.Twitter;
 import Models.Peer;
 import Models.Peers;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +27,7 @@ import java.util.logging.Logger;
  * @author migpfernandes
  */
 public class NetworkListener implements Runnable {
+
     private static final int TTL = 1;
     private static final String PEERSEPARATOR = "\t";
 
@@ -53,6 +56,8 @@ public class NetworkListener implements Runnable {
                 ProcessRouteRequest(message);
             } else if (message.startsWith("ROUTE_REPLY")) {
                 ProcessRouteReply(message);
+            } else if (message.startsWith("MESSAGE")) {
+                ProcessTwitter(message);
             }
         } catch (IOException ex) {
             Logger.getLogger(NetworkListener.class.getName()).log(Level.SEVERE, null, ex);
@@ -70,14 +75,14 @@ public class NetworkListener implements Runnable {
         AddSenderPeer(msg.getSender(), senderIp);
 
         if (msg.getType() == MessageType.Request) {
-            SendHelloReply(msg.getSender(),senderIp);
+            SendHelloReply(msg.getSender(), senderIp);
         } else {
-            Global.peers.RegisterPeers(msg.getSender(),Peers.fromDataInMsg(
+            Global.peers.RegisterPeers(msg.getSender(), Peers.fromDataInMsg(
                     msg.getSender(), senderIp, msg.getPeers()));
         }
     }
 
-    public void SendHelloReply(String senderName,InetAddress senderIp) throws SocketException, IOException {
+    public void SendHelloReply(String senderName, InetAddress senderIp) throws SocketException, IOException {
         Hello helloMessage = new Hello(Global.machineName, MessageType.Reply,
                 Global.peers.getDataToMsg(senderName));
 
@@ -90,7 +95,7 @@ public class NetworkListener implements Runnable {
     //ROUTE REQUEST
     public void ProcessRouteRequest(String message) throws IOException {
         RouteRequest msg = new RouteRequest(message);
-        
+
         if ((msg.getPeers() != null)
                 && (Arrays.contains(msg.getPeers().split(PEERSEPARATOR), Global.machineName))) {
             //Não faz nada
@@ -210,5 +215,35 @@ public class NetworkListener implements Runnable {
             i++;
         }
         return result;
+    }
+
+    //TWITTER
+    public void ProcessTwitter(String message) throws IOException {
+        Twitter msg = new Twitter(message);
+        byte msgRe[];
+        Peer p;
+        if (msg.getDestination().equals(Global.machineName)) {
+            System.out.println(String.format("Chegou ao destino.\nMessage: %s",msg.getMessage()));
+            Global.tcpSockets.writeMessage(msg);
+        } else {
+            p = Global.peers.get(msg.getDestination());
+            if (p == null) {
+                NeighbourFind nf = new NeighbourFind(msg.getDestination(), Global.LEAP_COUNT);
+                nf.run();
+
+                if (nf.peerFound()) {
+                    p = Global.peers.get(msg.getDestination());
+                }
+            }
+
+            if (p == null) {
+                System.out.println(String.format("O peer '%s' não foi encontrado!", msg.getDestination()));
+            } else {
+                msgRe = msg.GetBytes();
+                DatagramPacket packet = new DatagramPacket(msgRe, msgRe.length, p.getNeighbourIP(), Global.APP_PORT);
+                Global.adhocSocket.SendMessage(packet);
+            }
+
+        }
     }
 }
