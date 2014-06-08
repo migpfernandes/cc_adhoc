@@ -6,8 +6,11 @@
 
 package Models;
 
+import Common.Global;
 import java.net.InetAddress;
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  *
@@ -21,7 +24,7 @@ public class Peer implements Comparable{
     private String NeighbourName;
     private InetAddress NeighbourIP;
     private int Leaps;
-    private Date LastSuccessfulConnection;
+    private Timestamp LastSuccessfulConnection;
 
     /**
      * @return the Name
@@ -96,15 +99,16 @@ public class Peer implements Comparable{
     /**
      * @return the LastSuccessfulConnection
      */
-    public Date getLastSuccessfulConnection() {
+    public Timestamp getLastSuccessfulConnection() {
         return LastSuccessfulConnection;
     }
+    
+    public void setLastSuccessfulConnection(Timestamp value) {
+        this.LastSuccessfulConnection = value;
+    }
 
-    /**
-     * @param LastSuccessfulConnection the LastSuccessfulConnection to set
-     */
-    public void setLastSuccessfulConnection(Date LastSuccessfulConnection) {
-        this.LastSuccessfulConnection = LastSuccessfulConnection;
+    public void refreshLastSuccessfulConnection() {
+        this.LastSuccessfulConnection = new Timestamp(new GregorianCalendar().getTimeInMillis());
     }
     
     public boolean isDirectNeighbour(){
@@ -120,7 +124,7 @@ public class Peer implements Comparable{
         this.NeighbourName="";
         this.NeighbourIP=null;
         this.Leaps=0;
-        this.LastSuccessfulConnection = new Date();
+        this.refreshLastSuccessfulConnection();
     }
     
     public Peer(String name,String neighbour,InetAddress ip){
@@ -129,7 +133,7 @@ public class Peer implements Comparable{
         this.NeighbourName=neighbour;
         this.NeighbourIP=ip;
         this.Leaps=0;
-        this.LastSuccessfulConnection = new Date();
+        this.refreshLastSuccessfulConnection();
     }
     
     public Peer(Peer p){
@@ -188,5 +192,13 @@ public class Peer implements Comparable{
         } else {
             throw new IllegalArgumentException("O objeto não pode ser convertido para Peer.");
         }
+    }
+    
+    public boolean Expired(){
+        Calendar dateToCompare = GregorianCalendar.getInstance();
+        dateToCompare.setTimeInMillis(this.LastSuccessfulConnection.getTime());
+        dateToCompare.add(GregorianCalendar.SECOND,Global.DEAD_INTERVAL);
+        
+        return (dateToCompare.compareTo(new GregorianCalendar())>0);
     }
 }

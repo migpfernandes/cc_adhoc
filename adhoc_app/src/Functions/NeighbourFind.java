@@ -22,7 +22,6 @@ import java.util.logging.Logger;
  */
 public class NeighbourFind implements Runnable {
 
-    private final int PORTDESTINATION = 9999;
     private final String PEERSEPARATOR = "\t";
     private final int TIMEOUT = 10;
 
@@ -49,7 +48,7 @@ public class NeighbourFind implements Runnable {
                     if ((request.getPeers() == null) || (!Arrays.contains(msgPeers, p.getName()))) {
                         this.request.setDestination(p.getName());
                         byte[] msg = this.request.GetBytes();
-                        DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), PORTDESTINATION);
+                        DatagramPacket message = new DatagramPacket(msg, msg.length, p.getNeighbourIP(), Global.APP_PORT);
                         s.send(message);
                     }
                 }

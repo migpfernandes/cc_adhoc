@@ -25,9 +25,6 @@ import java.util.logging.Logger;
  * @author migpfernandes
  */
 public class NetworkListener implements Runnable {
-
-    private static final int PORT = 9999;
-    private static final String MCAST_ADDR = "FF02::1";
     private static final int TTL = 1;
     private static final String PEERSEPARATOR = "\t";
 
@@ -73,26 +70,25 @@ public class NetworkListener implements Runnable {
         AddSenderPeer(msg.getSender(), senderIp);
 
         if (msg.getType() == MessageType.Request) {
-            SendHelloReply(senderIp);
+            SendHelloReply(msg.getSender(),senderIp);
         } else {
-            Global.peers.RegisterPeers(Peers.fromDataInMsg(
+            Global.peers.RegisterPeers(msg.getSender(),Peers.fromDataInMsg(
                     msg.getSender(), senderIp, msg.getPeers()));
         }
     }
 
-    public void SendHelloReply(InetAddress senderIp) throws SocketException, IOException {
+    public void SendHelloReply(String senderName,InetAddress senderIp) throws SocketException, IOException {
         Hello helloMessage = new Hello(Global.machineName, MessageType.Reply,
-                Global.peers.getDataToMsg());
+                Global.peers.getDataToMsg(senderName));
 
         byte[] msg = helloMessage.GetBytes();
 
-        DatagramPacket p = new DatagramPacket(msg, msg.length, senderIp, PORT);
+        DatagramPacket p = new DatagramPacket(msg, msg.length, senderIp, Global.APP_PORT);
         Global.adhocSocket.SendMessage(p);
     }
 
     //ROUTE REQUEST
     public void ProcessRouteRequest(String message) throws IOException {
-        String peers[];
         RouteRequest msg = new RouteRequest(message);
         
         if ((msg.getPeers() != null)
@@ -139,7 +135,7 @@ public class NetworkListener implements Runnable {
 
         byte[] msg = reply.GetBytes();
 
-        DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), PORT);
+        DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), Global.APP_PORT);
         Global.adhocSocket.SendMessage(p);
     }
 
@@ -165,7 +161,8 @@ public class NetworkListener implements Runnable {
 
         if (reply.getAnswerType().equals("OK")) {
             Peer peer = Global.peers.get(reply.getSender());
-            Global.peers.RegisterPeer(reply.getPeerToFind(), peer.getName(), peer.getNeighbourIP(), reply.getLeaps());
+            Global.peers.RegisterPeer(reply.getPeerToFind(), peer.getName(), peer.getNeighbourIP(),
+                    reply.getLeaps());
         }
 
         if ((reply.getPeers() != null) && !(reply.getPeers().isEmpty())) {
@@ -179,7 +176,7 @@ public class NetworkListener implements Runnable {
 
             byte[] msg = reply.GetBytes();
 
-            DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), PORT);
+            DatagramPacket p = new DatagramPacket(msg, msg.length, peer.getNeighbourIP(), Global.APP_PORT);
             Global.adhocSocket.SendMessage(p);
         } else if (reply.getAnswerType().equals("NF")) {
             System.out.println("O peer " + reply.getPeerToFind() + " não foi encontrado.");

@@ -42,12 +42,12 @@ public class Adhoc_app {
             }
             Global.adhocSocket = new AdHocSocket();
             Global.peers = new Peers(Global.machineName);
-            
+
             Thread thread = new Thread(new NetworkListener());
             thread.start();
             Thread thread2 = new Thread(new NeighbourDiscoverer());
             thread2.start();
-            
+
             tester();
         } catch (IOException ex) {
             Logger.getLogger(Adhoc_app.class.getName()).log(Level.SEVERE, null, ex);
@@ -103,23 +103,23 @@ public class Adhoc_app {
                             // Found non-loopback site-local address. Return it immediately...
                             return inetAddr;
                         } else if (candidateAddress == null) {
-                        // Found non-loopback address, but not necessarily site-local.
+                            // Found non-loopback address, but not necessarily site-local.
                             // Store it as a candidate to be returned if site-local address is not subsequently found...
                             candidateAddress = inetAddr;
-                        // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
+                            // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
                             // only the first. For subsequent iterations, candidate will be non-null.
                         }
                     }
                 }
             }
             if (candidateAddress != null) {
-            // We did not find a site-local address, but we found some other non-loopback address.
+                // We did not find a site-local address, but we found some other non-loopback address.
                 // Server might have a non-site-local address assigned to its NIC (or it might be running
                 // IPv6 which deprecates the "site-local" concept).
                 // Return this non-loopback candidate address...
                 return candidateAddress;
             }
-        // At this point, we did not find a non-loopback address.
+            // At this point, we did not find a non-loopback address.
             // Fall back to returning whatever InetAddress.getLocalHost() returns...
             InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
             if (jdkSuppliedAddress == null) {

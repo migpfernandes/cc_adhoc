@@ -11,10 +11,7 @@ import Models.Message.MessageType;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,15 +21,12 @@ import java.util.logging.Logger;
  */
 public class NeighbourDiscoverer implements Runnable {
 
-    public final int PORT = 9999;
-    public final String MCAST_ADDR = "FF02::1";
     public final int TTL = 1;
-
 
     public NeighbourDiscoverer() {
     }
-    
-        @Override
+
+    @Override
     public void run() {
         try {
             InitDiscovery();
@@ -42,35 +36,23 @@ public class NeighbourDiscoverer implements Runnable {
     }
 
     public void InitDiscovery() throws UnknownHostException, IOException {
-        Hello helloMessage = new Hello(Global.machineName, MessageType.Request, "");
+        byte[] msg;
 
-        byte[] msg = helloMessage.GetBytes();
-        InetAddress group = InetAddress.getByName(MCAST_ADDR);
-    
-        DatagramPacket message = new DatagramPacket(msg, msg.length,group,PORT);
-        
-        Global.adhocSocket.SendMessage(message);
-        
-        /*
-        
-        MulticastSocket mSocket = new MulticastSocket();
-        mSocket.setTimeToLive(TTL);
+        InetAddress group = InetAddress.getByName(Global.MCAST_ADDR);
 
-        
+        while (true) {
+            Hello helloMessage = new Hello(Global.machineName, MessageType.Request, "");
+            msg = helloMessage.GetBytes();
 
-        //Testar sem este bloco
-        Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
-        while (ifs.hasMoreElements()) {
-            NetworkInterface nic = ifs.nextElement();
+            DatagramPacket message = new DatagramPacket(msg, msg.length, group, Global.APP_PORT);
 
-            if (!nic.isLoopback()) {
-                mSocket.setNetworkInterface(nic);
-                mSocket.joinGroup(group);
-                mSocket.send(message);
+            Global.adhocSocket.SendMessage(message);
+            try {
+                Thread.sleep( Global.HELLO_INTERVAL * 1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(NeighbourDiscoverer.class.getName()).log(Level.SEVERE, null, ex);
             }
+            Global.peers.InvalidePeerList();
         }
-        mSocket.close();
-        */
     }
-
 }

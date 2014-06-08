@@ -83,7 +83,7 @@ public class Hello {
             if (fields.length == 4) this.peers = fields[3];
             
         } else {
-            throw new IllegalArgumentException("Não é possível construir o obejto HelloMessage a partir da String recebida.");
+            throw new IllegalArgumentException("Não é possível construir o objeto HelloMessage a partir da String recebida.");
         }
     }
     
